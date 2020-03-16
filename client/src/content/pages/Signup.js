@@ -12,7 +12,29 @@ const Signup = props => {
 
   const handleSubmit = e => {
     e.preventDefault()
-    // TODO: Send the user sign up data to the server
+    fetch(`${process.env.REACT_APP_SERVER_URL}/auth/signup`, {
+      method: 'POST',
+      body: JSON.stringify({
+        firstname,
+        lastname,
+        email,
+        password,
+        profileUrl
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.log(response)
+        setMessage(`${response.status}: ${response.statusText}`)
+        return
+      }
+      response.json().then(result => {
+        // Update App with user info
+        props.updateUser(result.token)
+      })
   }
 
   return (

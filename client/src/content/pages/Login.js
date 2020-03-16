@@ -10,7 +10,31 @@ const Login = props => {
   // Event handlers
   const handleSubmit = e => {
     e.preventDefault()
-    // TODO: Fetch call to POST data
+    fetch(`${process.env.REACT_APP_SERVER_URL}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password
+      }),
+      headers: {
+        `Content-Type`: `application/json`
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        setMessage(`${response.status} error`);
+        return
+      }
+      // else take response and update user
+      response.json().then(result => {
+        props.updateUser(result.token);
+      })
+    })
+    .catch(err => console.log(err));
+
+    if (props.user) {
+      return <Redirect to='/profile' />
+    }
   }
 
   return (
