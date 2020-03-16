@@ -1,11 +1,17 @@
 // Packages
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Redirect } from 'react-router-dom'
 
 const Login = props => {
   // Declare and initialize state variables
   let [email, setEmail] = useState('')
   let [message, setMessage] = useState('')
   let [password, setPassword] = useState('')
+
+
+  useEffect(() => {
+    setMessage('')
+  }, [email, password])
 
   // Event handlers
   const handleSubmit = e => {
@@ -17,24 +23,29 @@ const Login = props => {
         password
       }),
       headers: {
-        `Content-Type`: `application/json`
+        'Content-Type': 'application/json'
       }
     })
     .then(response => {
       if (!response.ok) {
-        setMessage(`${response.status} error`);
+        setMessage(`${response.status}: ${response.statusText}`)
         return
       }
-      // else take response and update user
+
       response.json().then(result => {
-        props.updateUser(result.token);
+        // console.log(result)
+        // Update App with user info
+        props.updateUser(result.token)
       })
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.log(err)
+      setMessage(`${err.toString()}`)
+    })
+  }
 
-    if (props.user) {
-      return <Redirect to='/profile' />
-    }
+  if (props.user) {
+    return <Redirect to="/profile" />
   }
 
   return (
