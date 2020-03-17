@@ -1,5 +1,6 @@
 // Packages
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import {Redirect} from 'react-router-dom'
 
 const Login = props => {
   // Declare and initialize state variables
@@ -7,10 +8,43 @@ const Login = props => {
   let [message, setMessage] = useState('')
   let [password, setPassword] = useState('')
 
+  useEffect(() => {
+    setMessage('');
+  }, [email, password])
+
   // Event handlers
   const handleSubmit = e => {
     e.preventDefault()
-    // TODO: Fetch call to POST data
+    // make a fetch request to get route of the server to check for authentication
+    fetch(`${process.env.REACT_APP_SERVER_URL}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    // setMessage to erroe if not authenticate
+      .then(response => {
+        if (!response.ok) {
+          setMessage(`${response.status}: ${response.statusText}`)
+          return;
+        }
+        
+        response.json().then(result => {
+          props.updateUser(result.token);
+        })
+      }).catch(err => {
+        console.log(err);
+        setMessage(`${err.toString()}`)
+    })
+  }
+
+  // if authenticated we are updateUser + redirect to profile
+  if (props.user) {
+    return <Redirect to="/profile" />
   }
 
   return (

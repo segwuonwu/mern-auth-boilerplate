@@ -1,5 +1,6 @@
 // Packages
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import { redirect, Redirect } from 'react-router-dom';
 
 const Signup = props => {
   // Declare and initialize state variables
@@ -10,9 +11,43 @@ const Signup = props => {
   let [password, setPassword] = useState('')
   let [profileUrl, setProfileUrl] = useState('')
 
+  useEffect(()=> {
+    setMessage("")
+  }, [email, firstname, lastname, password, profileUrl])
+
   const handleSubmit = e => {
     e.preventDefault()
-    // TODO: Send the user sign up data to the server
+    fetch(`${process.env.REACT_APP_SERVER_URL}/auth/signup`, {
+      method: 'POST',
+      body: JSON.stringify({
+        firstname,
+        lastname,
+        email,
+        password,
+        profileUrl
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      if (!response.ok) {
+        console.log(response);
+        setMessage(`${response.status}: ${response.statusText}`);
+        return;
+      }
+
+      // if user signup succesfully
+      response.json().then(result => {
+        props.updateUser(result.token);
+      })
+    })
+    // Update the state of each declared variable tobe set to form input from user
+    // post update state to the server
+
+  }
+
+  if (props.user) {
+    return <Redirect to="/profile" />
   }
 
   return (
